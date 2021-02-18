@@ -20,3 +20,8 @@ I use pytorch for implementation.
 | ViT patch=4 |    80%   |
 | ViT patch=8 |    30%   |
 |   resnet18  |  93% ;)  |
+
+## result of Zhou
+|             | dataset downloaded manually | Accuracy |
+|:-----------:|:-----------:|:--------:|
+| ViT patch=4 |    yes    |    %    |
