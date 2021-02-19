@@ -29,7 +29,7 @@ from utils import progress_bar
 
 # parsers
 parser = argparse.ArgumentParser(description='PyTorch CIFAR10 Training')
-parser.add_argument('--lr', default=1e-4, type=float, help='learning rate') # resnets.. 1e-3, Vit..1e-4?
+parser.add_argument('--lr', default=1e-4, type=float, help='learning rate')  # resnets.. 1e-3, Vit..1e-4?
 parser.add_argument('--opt', default="adam")
 parser.add_argument('--resume', '-r', action='store_true', help='resume from checkpoint')
 parser.add_argument('--aug', action='store_true', help='add image augumentations')
@@ -76,33 +76,33 @@ classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship'
 # Model
 print('==> Building model..')
 # net = VGG('VGG19')
-if args.net=='res18':
+if args.net == 'res18':
     net = ResNet18()
-elif args.net=='vgg':
+elif args.net == 'vgg':
     net = VGG('VGG19')
-elif args.net=='res34':
+elif args.net == 'res34':
     net = ResNet34()
-elif args.net=='res50':
+elif args.net == 'res50':
     net = ResNet50()
-elif args.net=='res101':
+elif args.net == 'res101':
     net = ResNet101()
-elif args.net=="vit":
+elif args.net == "vit":
     # ViT for cifar10
     net = ViT(
-    image_size = 32,
-    patch_size = args.patch,
-    num_classes = 10,
-    dim = 512,
-    depth = 6,
-    heads = 8,
-    mlp_dim = 512,
-    dropout = 0.1,
-    emb_dropout = 0.1
-)
+        image_size=32,
+        patch_size=args.patch,
+        num_classes=10,
+        dim=512,
+        depth=6,
+        heads=8,
+        mlp_dim=512,
+        dropout=0.1,
+        emb_dropout=0.1
+    )
 
 net = net.to(device)
 if device == 'cuda':
-    net = torch.nn.DataParallel(net) # make parallel
+    net = torch.nn.DataParallel(net)  # make parallel
     cudnn.benchmark = True
 
 if args.resume:
@@ -120,14 +120,17 @@ criterion = nn.CrossEntropyLoss()
 if args.opt == "adam":
     optimizer = optim.Adam(net.parameters(), lr=args.lr)
 elif args.opt == "sgd":
-    optimizer = optim.SGD(net.parameters(), lr=args.lr)    
+    optimizer = optim.SGD(net.parameters(), lr=args.lr)
 if not args.cos:
     from torch.optim import lr_scheduler
-    scheduler = lr_scheduler.ReduceLROnPlateau(optimizer, 'min', patience=3, verbose=True, min_lr=1e-3*1e-5, factor=0.1)
+
+    scheduler = lr_scheduler.ReduceLROnPlateau(optimizer, 'min', patience=3, verbose=True, min_lr=1e-3 * 1e-5,
+                                               factor=0.1)
 else:
-    scheduler_cosine = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, args.n_epochs-1)
+    scheduler_cosine = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, args.n_epochs - 1)
     scheduler = GradualWarmupScheduler(optimizer, multiplier=10, total_epoch=1, after_scheduler=scheduler_cosine)
-    
+
+
 ##### Training
 def train(epoch):
     print('\nEpoch: %d' % epoch)
@@ -139,6 +142,8 @@ def train(epoch):
         inputs, targets = inputs.to(device), targets.to(device)
         optimizer.zero_grad()
         outputs = net(inputs)
+        print("outputs.shape is", outputs.shape)
+        return
         loss = criterion(outputs, targets)
         loss.backward()
         optimizer.step()
@@ -149,11 +154,14 @@ def train(epoch):
         correct += predicted.eq(targets).sum().item()
 
         progress_bar(batch_idx, len(trainloader), 'Loss: %.3f | Acc: %.3f%% (%d/%d)'
-            % (train_loss/(batch_idx+1), 100.*correct/total, correct, total))
-    return train_loss/(batch_idx+1)
+                     % (train_loss / (batch_idx + 1), 100. * correct / total, correct, total))
+    return train_loss / (batch_idx + 1)
+
 
 ##### Validation
 import time
+
+
 def test(epoch):
     global best_acc
     net.eval()
@@ -172,14 +180,14 @@ def test(epoch):
             correct += predicted.eq(targets).sum().item()
 
             progress_bar(batch_idx, len(testloader), 'Loss: %.3f | Acc: %.3f%% (%d/%d)'
-                % (test_loss/(batch_idx+1), 100.*correct/total, correct, total))
-    
+                         % (test_loss / (batch_idx + 1), 100. * correct / total, correct, total))
+
     # Update scheduler
     if not args.cos:
         scheduler.step(test_loss)
-    
+
     # Save checkpoint.
-    acc = 100.*correct/total
+    acc = 100. * correct / total
     if acc > best_acc:
         print('Saving..')
         state = {
@@ -189,9 +197,9 @@ def test(epoch):
         }
         if not os.path.isdir('checkpoint'):
             os.mkdir('checkpoint')
-        torch.save(state, './checkpoint/'+args.net+'-{}-ckpt.t7'.format(args.patch))
+        torch.save(state, './checkpoint/' + args.net + '-{}-ckpt.t7'.format(args.patch))
         best_acc = acc
-    
+
     os.makedirs("log", exist_ok=True)
     content = time.ctime() + ' ' + f'Epoch {epoch}, lr: {optimizer.param_groups[0]["lr"]:.7f}, val loss: {test_loss:.5f}, acc: {(acc):.5f}'
     print(content)
@@ -199,23 +207,22 @@ def test(epoch):
         appender.write(content + "\n")
     return test_loss, acc
 
+
 list_loss = []
 list_acc = []
 for epoch in range(start_epoch, args.n_epochs):
     trainloss = train(epoch)
     val_loss, acc = test(epoch)
-    
+
     if args.cos:
-        scheduler.step(epoch-1)
-    
+        scheduler.step(epoch - 1)
+
     list_loss.append(val_loss)
     list_acc.append(acc)
-    
+
     # write as csv for analysis
     with open(f'log/log_{args.net}_patch{args.patch}.csv', 'w') as f:
         writer = csv.writer(f, lineterminator='\n')
-        writer.writerow(list_loss) 
-        writer.writerow(list_acc) 
+        writer.writerow(list_loss)
+        writer.writerow(list_acc)
     print(list_loss)
-    
-    
