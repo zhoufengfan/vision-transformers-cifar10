@@ -24,4 +24,4 @@ I use pytorch for implementation.
 ## result of Zhou
 |             | dataset downloaded manually | Accuracy |
 |:-----------:|:-----------:|:--------:|
-| ViT patch=4 |    yes    |    %    |
+| ViT patch=4 |    yes    |    80%    |
