@@ -22,6 +22,7 @@ I use pytorch for implementation.
 |   resnet18  |  93% ;)  |
 
 ## result of Zhou
-|             | dataset downloaded manually | Accuracy |
-|:-----------:|:-----------:|:--------:|
-| ViT patch=4 |    yes    |    80%    |
+|id|net| dataset downloaded manually | Accuracy |
+|:-----------:|:-----------:|:-----------:|:--------:|
+|0| ViT patch=4 |    yes    |    80%    |
+|1| resnet18 |    yes    |    %    |
