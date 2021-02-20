@@ -26,4 +26,4 @@ I use pytorch for implementation.
 |:-----------:|:-----------:|:-----------:|:--------:|
 |0| ViT patch=4 |    yes    |    80%    |
 |1| resnet18 |    yes    |    91%    |
-|2| resnet18 add a fc |    yes    |    %    |
+|2| resnet18 add a fc |    yes    |    82%    |
