@@ -24,6 +24,7 @@ import pandas as pd
 import csv
 
 from models import *
+from models.network2 import Network2
 from models.vit import ViT
 from utils import progress_bar
 
@@ -80,6 +81,8 @@ if args.net == 'res18':
     net = ResNet18()
 elif args.net == 'vgg':
     net = VGG('VGG19')
+elif args.net == 'network2':
+    net = Network2()
 elif args.net == 'res34':
     net = ResNet34()
 elif args.net == 'res50':
